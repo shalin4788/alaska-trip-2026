@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alaska 2026 — Trail Log</title>
+<style>
+  :root{
+    --spruce: #1f3b34;
+    --spruce-deep: #142822;
+    --ice: #7fb3c9;
+    --amber: #d98e34;
+    --paper: #f3efe4;
+    --paper-line: #d9d2bd;
+    --ink: #21261f;
+    --rust: #a84b32;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height:1.5;
+  }
+  .display{
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    font-weight:700;
+    letter-spacing:0.01em;
+  }
+  .mono{
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    letter-spacing:0.02em;
+  }
+
+  /* ===== topo texture header ===== */
+  header{
+    position:relative;
+    background:var(--spruce-deep);
+    color:var(--paper);
+    padding:64px 24px 48px;
+    overflow:hidden;
+    border-bottom:6px solid var(--amber);
+  }
+  header::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(127,179,201,0.18) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(217,142,52,0.14) 0, transparent 45%);
+    pointer-events:none;
+  }
+  .topo-lines{
+    position:absolute; inset:0; opacity:0.35; pointer-events:none;
+  }
+  .eyebrow{
+    font-family:"SF Mono", monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--ice);
+    margin:0 0 14px;
+  }
+  h1.display{
+    font-size:clamp(38px, 7vw, 74px);
+    margin:0 0 8px;
+    line-height:1.02;
+    color:var(--paper);
+    position:relative;
+  }
+  header p.sub{
+    max-width:560px;
+    color:#cfd8ce;
+    font-size:16px;
+    margin:14px 0 0;
+    position:relative;
+  }
+  .crew{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:26px; position:relative;
+  }
+  .crew span{
+    font-family:"SF Mono", monospace;
+    font-size:12px;
+    border:1px solid rgba(127,179,201,0.5);
+    color:var(--ice);
+    padding:5px 11px;
+    border-radius:99px;
+    letter-spacing:0.03em;
+  }
+
+  main{max-width:920px; margin:0 auto; padding:0 24px 100px;}
+
+  /* nav route bar */
+  nav.route{
+    display:flex; overflow-x:auto; gap:0;
+    margin:-1px 0 56px;
+    background:var(--spruce);
+    border-radius:0 0 10px 10px;
+  }
+  nav.route a{
+    color:#e7e2d3; text-decoration:none;
+    font-family:"SF Mono", monospace;
+    font-size:12px;
+    padding:14px 18px;
+    white-space:nowrap;
+    border-right:1px solid rgba(255,255,255,0.12);
+  }
+  nav.route a:hover{background:rgba(255,255,255,0.06);}
+
+  section{margin-bottom:64px; scroll-margin-top:24px;}
+  .section-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:26px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:10px;
+  }
+  .section-head .num{
+    font-family:"SF Mono", monospace;
+    font-size:13px;
+    color:var(--rust);
+  }
+  .section-head h2{
+    font-size:26px; margin:0;
+  }
+
+  /* ===== Trail / day timeline ===== */
+  .trail{position:relative; padding-left:34px;}
+  .trail::before{
+    content:"";
+    position:absolute; left:9px; top:6px; bottom:6px; width:2px;
+    background:repeating-linear-gradient(to bottom, var(--spruce) 0 6px, transparent 6px 11px);
+  }
+  .waypoint{position:relative; margin-bottom:34px;}
+  .waypoint::before{
+    content:"";
+    position:absolute; left:-34px; top:4px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--paper); border:3px solid var(--spruce);
+  }
+  .waypoint.active::before{ background:var(--amber); border-color:var(--rust); }
+  .wp-date{
+    font-family:"SF Mono", monospace;
+    font-size:12px; color:var(--rust); text-transform:uppercase; letter-spacing:0.06em;
+  }
+  .wp-title{font-size:19px; font-weight:700; margin:3px 0 6px;}
+  .wp-body{font-size:14.5px; color:#3a4038; max-width:640px;}
+  .wp-body .tag{
+    display:inline-block; margin-top:8px; margin-right:6px;
+    background:var(--spruce); color:var(--paper);
+    font-family:"SF Mono", monospace; font-size:11px;
+    padding:3px 9px; border-radius:99px;
+  }
+
+  /* ===== cards ===== */
+  .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:18px;}
+  .card{
+    background:#fff; border:1px solid var(--paper-line);
+    border-radius:10px; padding:20px 22px;
+    position:relative;
+  }
+  .card::before{
+    content:"";
+    position:absolute; left:0; top:18px; bottom:18px; width:4px;
+    background:var(--ice); border-radius:0 3px 3px 0;
+  }
+  .card.amber::before{background:var(--amber);}
+  .card.rust::before{background:var(--rust);}
+  .card h3{margin:0 0 4px; font-size:18px;}
+  .card .loc{font-size:13px; color:#666; margin-bottom:12px;}
+  .kv{display:flex; justify-content:space-between; font-size:13.5px; padding:6px 0; border-top:1px dashed var(--paper-line);}
+  .kv:first-of-type{border-top:none;}
+  .kv span:first-child{color:#666;}
+  .kv span:last-child{font-family:"SF Mono", monospace; text-align:right;}
+  .stamp{
+    display:inline-block; margin-top:12px;
+    font-family:"SF Mono", monospace; font-size:11px;
+    border:1.5px solid var(--rust); color:var(--rust);
+    padding:3px 10px; border-radius:4px;
+    transform:rotate(-1.5deg);
+  }
+  .badge{
+    display:inline-block; margin-bottom:10px;
+    font-family:"SF Mono", monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:99px;
+  }
+  .badge.booked{ background:var(--rust); color:#fff; }
+  .badge.suggested{ background:var(--ice); color:var(--spruce-deep); }
+  .note{
+    margin-top:12px; font-size:12.5px; background:var(--paper);
+    border:1px dashed var(--paper-line); padding:9px 11px; border-radius:6px; color:#4a4a3f;
+  }
+
+  /* flight rows */
+  .flight{background:#fff; border:1px solid var(--paper-line); border-radius:10px; padding:20px 22px; margin-bottom:14px;}
+  .flight .leg{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .flight .pt{text-align:center;}
+  .flight .pt .code{font-size:26px; font-weight:700; font-family:Georgia,serif;}
+  .flight .pt .time{font-family:"SF Mono", monospace; font-size:13px; color:#555;}
+  .flight .arrow{flex:1; text-align:center; color:var(--rust); font-size:13px; font-family:"SF Mono",monospace; min-width:120px;}
+  .flight .meta{margin-top:12px; font-size:12.5px; color:#666; display:flex; gap:16px; flex-wrap:wrap;}
+  .flight .flightno{
+    font-family:"SF Mono",monospace; font-size:11px; background:var(--spruce); color:var(--paper);
+    padding:2px 8px; border-radius:99px;
+  }
+
+  footer{
+    text-align:center; padding:40px 24px 60px; color:#7a7a6d; font-size:12.5px;
+    font-family:"SF Mono", monospace;
+  }
+
+  @media (max-width:600px){
+    header{padding:48px 18px 36px;}
+    .trail{padding-left:26px;}
+    .waypoint::before{left:-26px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topo-lines"></div>
+  <p class="eyebrow">Field Log · 61.2°N 149.9°W</p>
+  <h1 class="display">Alaska, July 2026</h1>
+  <p class="sub">One route, four travelers, seven days — Anchorage to Denali to the Kenai Fjords and back. Everything anyone needs is on this page: no app, no login, just bookmark it.</p>
+  <div class="crew">
+    <span>Richa Zaveri</span>
+    <span>Deep Kadakia</span>
+    <span>Shalin Gosalia</span>
+    <span>Khushbu Desai</span>
+  </div>
+</header>
+
+<nav class="route">
+  <a href="#itinerary" data-target="itinerary">Itinerary</a>
+  <a href="#ground" data-target="ground">Home ↔ Airport</a>
+  <a href="#flights" data-target="flights">Flights</a>
+  <a href="#car" data-target="car">Car</a>
+  <a href="#stays" data-target="stays">Stays</a>
+  <a href="#activities" data-target="activities">Activities</a>
+  <a href="#food" data-target="food">Food</a>
+  <a href="#shopping" data-target="shopping">Shopping</a>
+  <a href="#pending" data-target="pending">Pending</a>
+  <a href="#attachments" data-target="attachments">Attachments</a>
+</nav>
+
+<main>
+
+  <section id="itinerary">
+    <div class="section-head"><span class="num">01</span><h2>The Route</h2></div>
+    <div class="trail">
+
+      <div class="waypoint">
+        <div class="wp-date">Sat, Jul 11 — afternoon</div>
+        <div class="wp-title">Everyone meets at East Windsor → cab to EWR</div>
+        <div class="wp-body">Deep and Khushbu drive to Shalin &amp; Richa's East Windsor home first, then all four ride together to EWR for the 5:55pm flight.
+          <div><span class="tag">Depart: East Windsor home, ~3:00pm</span><span class="tag">Chandrakant Bhai driving</span><span class="tag">Arrive: EWR, ~3:55pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Sat, Jul 11</div>
+        <div class="wp-title">Fly in → Anchorage</div>
+        <div class="wp-body">Connect through Minneapolis, land in Anchorage just after midnight.
+          <div><span class="tag">Depart: EWR, 5:55pm</span><span class="tag">Flights DL2866 / DL0411</span><span class="tag">Arrive: ANC, 12:59am</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Sun, Jul 12 — after midnight</div>
+        <div class="wp-title">Land ANC → Turo pickup → Microtel</div>
+        <div class="wp-body">Land at 12:59am, but budget real time to deplane, collect bags, and sort out the Turo pickup before you're even on the road — that's easily 30–45 minutes before driving starts. Expect a late check-in at the Microtel, likely closer to 2am than 1:20am, with limited sleep before heading to Talkeetna.
+          <div><span class="tag">Land: ANC, 12:59am</span><span class="tag">Jeep Renegade · ~15 mi · ~20m drive</span><span class="tag">Arrive: Microtel Eagle River, ~2:00am (approx)</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Sun, Jul 12 — later</div>
+        <div class="wp-title">Microtel → roam Talkeetna → check in</div>
+        <div class="wp-body">Checkout is 12:00pm, but no need to rush — the drive up is only ~2h15m, leaving plenty of room to wander downtown Talkeetna before heading to Skip's place.
+          <div><span class="tag">Depart: Microtel, flexible</span><span class="tag">Jeep · ~110 mi · ~2h15m drive</span><span class="tag">Check-in 3:00pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Mon, Jul 13 — early</div>
+        <div class="wp-title">Skip's place → Denali Bus Depot</div>
+        <div class="wp-body">Longer drive than it looks on the map — leave with real buffer so the 11:10am check-in isn't a scramble.
+          <div><span class="tag">Depart: Talkeetna, ~8:00am</span><span class="tag">Jeep · ~155 mi · ~3h drive</span><span class="tag">Arrive: Denali Bus Depot, ~11:00am</span><span class="tag">Check-in by 11:10am</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint active">
+        <div class="wp-date">Mon, Jul 13</div>
+        <div class="wp-title">Denali National Park</div>
+        <div class="wp-body">East Fork Transit into the park, back at the depot around 4:15pm.
+          <div><span class="tag">Depart: Denali Bus Depot, 11:30am</span><span class="tag">East Fork Transit bus</span><span class="tag">Returns ~4:15pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Mon, Jul 13 — evening</div>
+        <div class="wp-title">Denali Bus Depot → back to Skip's place</div>
+        <div class="wp-body">Same ~3 hour drive in reverse, back to Talkeetna for a second night before heading south.
+          <div><span class="tag">Depart: Denali Bus Depot, ~4:30pm</span><span class="tag">Jeep · ~155 mi · ~3h drive</span><span class="tag">Arrive: Talkeetna, ~7:30pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Tue, Jul 14</div>
+        <div class="wp-title">Talkeetna → Seward</div>
+        <div class="wp-body">Longest driving leg of the trip, south through Anchorage to the Kenai Peninsula. Leaving right at checkout lands close to the 3:00pm check-in, with little slack for stops.
+          <div><span class="tag">Depart: Talkeetna, ~11:00am</span><span class="tag">Jeep · ~240 mi · ~4h45m drive</span><span class="tag">Arrive: Seward, ~3:45pm</span><span class="tag">Check-in 3:00pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint active">
+        <div class="wp-date">Wed, Jul 15</div>
+        <div class="wp-title">Kenai Fjords Cruise</div>
+        <div class="wp-body">Half-day wildlife cruise through Resurrection Bay — whales, glaciers, and (hopefully) calm water.
+          <div><span class="tag">Depart: Seward harbor, 10:00am</span><span class="tag">Wildlife cruise boat</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Thu, Jul 16</div>
+        <div class="wp-title">Seward → Anchorage</div>
+        <div class="wp-body">Plenty of buffer on this one — room for a stop along the way and still land well before check-in.
+          <div><span class="tag">Depart: Seward, ~11:00am</span><span class="tag">Jeep · ~125 mi · ~2h30m drive</span><span class="tag">Arrive: Anchorage, ~1:30pm</span><span class="tag">Check-in 3:00pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Fri, Jul 17</div>
+        <div class="wp-title">Last day → fly home</div>
+        <div class="wp-body">Most of the day is open in Anchorage — nothing booked until the car return. See "Still Pending" for ideas, then a short hop to return the Jeep before the flight.
+          <div><span class="tag">Depart: Hyatt, ~6:15pm</span><span class="tag">Jeep · ~5 mi · ~15m drive</span><span class="tag">Arrive: ANC airport, ~6:30pm</span><span class="tag">Flight departs 8:04pm</span></div>
+        </div>
+      </div>
+
+      <div class="waypoint">
+        <div class="wp-date">Sat, Jul 18</div>
+        <div class="wp-title">Land JFK → cab → East Windsor</div>
+        <div class="wp-body">One ride straight from JFK back to the East Windsor home — Deep and Khushbu head to their own place from there.
+          <div><span class="tag">Depart: JFK, ~7:18am</span><span class="tag">Chandrakant Bhai driving</span><span class="tag">Arrive: East Windsor home</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="ground">
+    <div class="section-head"><span class="num">02</span><h2>Home ↔ Airport</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>Outbound — Sat Jul 11</h3>
+        <div class="loc">East Windsor home → EWR</div>
+        <div class="kv"><span>Pickup point</span><span>Shalin &amp; Richa's home, East Windsor</span></div>
+        <div class="kv"><span>Who's coming</span><span>All 4 — Deep &amp; Khushbu come to the house first</span></div>
+        <div class="kv"><span>Driver</span><span>Chandrakant Bhai</span></div>
+        <div class="kv"><span>Depart</span><span>~3:00pm</span></div>
+        <div class="kv"><span>Arrival at airport</span><span>~3:55pm, EWR</span></div>
+        <div class="note">Deep and Khushbu come to the East Windsor house first, then everyone rides together to EWR with Chandrakant Bhai driving.</div>
+      </div>
+      <div class="card amber">
+        <h3>Return — Sat Jul 18</h3>
+        <div class="loc">JFK → East Windsor home</div>
+        <div class="kv"><span>Pickup point</span><span>JFK arrivals</span></div>
+        <div class="kv"><span>Who's coming</span><span>All 4 — Deep &amp; Khushbu head home from there</span></div>
+        <div class="kv"><span>Driver</span><span>Chandrakant Bhai</span></div>
+        <div class="kv"><span>Depart</span><span>~7:18am, JFK</span></div>
+        <div class="kv"><span>Arrival at home</span><span>East Windsor</span></div>
+        <div class="note">Chandrakant Bhai picks everyone up straight from JFK back to the East Windsor house, then Deep and Khushbu head to their own place.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="flights">
+    <div class="section-head"><span class="num">03</span><h2>Flights</h2></div>
+
+    <div class="eyebrow" style="color:var(--rust); margin:0 0 12px;">Outbound · Newark → Anchorage</div>
+
+    <div class="flight">
+      <div class="leg">
+        <div class="pt"><div class="code">EWR</div><div class="time">5:55pm · Sat Jul 11</div></div>
+        <div class="arrow">3h 25m nonstop →</div>
+        <div class="pt"><div class="code">MSP</div><div class="time">8:20pm</div></div>
+      </div>
+      <div class="meta"><span class="flightno">DL 2866</span><span>Airbus A319 · Terminal A → Terminal 1</span></div>
+    </div>
+
+    <div class="flight">
+      <div class="meta" style="margin-top:0; margin-bottom:10px;"><span>Layover in MSP · 1h 53m</span></div>
+      <div class="leg">
+        <div class="pt"><div class="code">MSP</div><div class="time">10:13pm · Sat Jul 11</div></div>
+        <div class="arrow">5h 46m nonstop →</div>
+        <div class="pt"><div class="code">ANC</div><div class="time">12:59am · Sun Jul 12</div></div>
+      </div>
+      <div class="meta"><span class="flightno">DL 0411</span><span>Boeing 757 · Terminal 1 → South Terminal</span><span>Total travel time: 11h 4m</span></div>
+    </div>
+
+    <div class="eyebrow" style="color:var(--rust); margin:36px 0 12px;">Return · Anchorage → New York</div>
+
+    <div class="flight">
+      <div class="leg">
+        <div class="pt"><div class="code">ANC</div><div class="time">8:04pm · Fri Jul 17</div></div>
+        <div class="arrow">7h 14m nonstop →</div>
+        <div class="pt"><div class="code">JFK</div><div class="time">7:18am · Sat Jul 18</div></div>
+      </div>
+      <div class="meta"><span class="flightno">AS 1535</span><span>Operated by Alaska Airlines · 3,379 miles</span><span>Total travel time: 7h 14m</span></div>
+    </div>
+  </section>
+
+  <section id="car">
+    <div class="section-head"><span class="num">04</span><h2>Rental Car</h2></div>
+    <div class="grid">
+      <div class="card amber">
+        <h3>Jeep Renegade 2018 (Turo)</h3>
+        <div class="loc">328 Boniface Parkway, Anchorage, AK 99504</div>
+        <div class="kv"><span>Pickup</span><span>Sun Jul 12, 1:00am</span></div>
+        <div class="kv"><span>Return</span><span>Fri Jul 17, 6:30pm</span></div>
+        <div class="kv"><span>Plate</span><span>JMG496</span></div>
+        <div class="note">Host confirmed pickup and drop-off happen directly at ANC airport — no separate rideshare needed to/from Boniface Parkway. 1:00am is the booked slot, but landing is 12:59am, so budget real time for deplaning and paperwork before you're actually driving.</div>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:16px;">
+      <div class="card">
+        <h3>Drive Summary</h3>
+        <div class="kv"><span>ANC airport → Microtel Eagle River</span><span>~15 mi · ~20m (approx, once on the road)</span></div>
+        <div class="kv"><span>Microtel Eagle River → Talkeetna</span><span>~110 mi · ~2h15m</span></div>
+        <div class="kv"><span>Talkeetna → Denali Bus Depot</span><span>~155 mi · ~3h</span></div>
+        <div class="kv"><span>Denali Bus Depot → Talkeetna</span><span>~155 mi · ~3h</span></div>
+        <div class="kv"><span>Talkeetna → Seward</span><span>~240 mi · ~4h45m</span></div>
+        <div class="kv"><span>Seward → Anchorage</span><span>~125 mi · ~2h30m</span></div>
+        <div class="kv"><span>Hyatt → ANC airport (car return)</span><span>~5 mi · ~15m</span></div>
+        <div class="note">Estimates only — actual time will run longer with stops, photo breaks, and activities along the way.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stays">
+    <div class="section-head"><span class="num">05</span><h2>Where We're Staying</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <h3>Microtel Inn &amp; Suites</h3>
+        <div class="loc">13049 Old Glenn Highway, Eagle River, AK 99577</div>
+        <div class="kv"><span>Check-in</span><span>Sat Jul 11, 3:00pm</span></div>
+        <div class="kv"><span>Checkout</span><span>Sun Jul 12, 12:00pm</span></div>
+        <div class="kv"><span>Room</span><span>2 Queens · 4 Adults</span></div>
+        <div class="stamp">CONF #85532EE040928</div>
+      </div>
+
+      <div class="card">
+        <h3>Home in Talkeetna</h3>
+        <div class="loc">14277 Woodpecker Avenue, Talkeetna, AK 99676 · Host: Skip</div>
+        <div class="kv"><span>Check-in</span><span>Sun Jul 12, 3:00pm</span></div>
+        <div class="kv"><span>Checkout</span><span>Tue Jul 14, 11:00am</span></div>
+        <div class="note">WiFi — <b>JTB Rentals</b> / 5Tabitha?<br>Front door code — <b>1976</b>, then press unlock.</div>
+      </div>
+
+      <div class="card">
+        <h3>Home in Seward</h3>
+        <div class="loc">34009 Orlander Avenue, Seward, AK · Host: Tasha</div>
+        <div class="kv"><span>Check-in</span><span>Tue Jul 14, 3:00pm</span></div>
+        <div class="kv"><span>Checkout</span><span>Thu Jul 16, 11:00am</span></div>
+        <div class="note">Message Tasha in-app for house manual and any questions.</div>
+      </div>
+
+      <div class="card">
+        <h3>Hyatt Place Anchorage–Midtown</h3>
+        <div class="loc">101 East Tudor Road, Anchorage, AK 99503</div>
+        <div class="kv"><span>Check-in</span><span>Thu Jul 16, 3:00pm</span></div>
+        <div class="kv"><span>Checkout</span><span>Fri Jul 17, 12:00pm</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="activities">
+    <div class="section-head"><span class="num">06</span><h2>Activities</h2></div>
+
+    <div class="eyebrow" style="color:var(--rust); margin:0 0 12px;">Booked</div>
+    <div class="grid">
+
+      <div class="card rust">
+        <span class="badge booked">Booked</span>
+        <h3>Denali East Fork Transit</h3>
+        <div class="loc">Denali Bus Depot, Mile 1 Denali Park Road</div>
+        <div class="kv"><span>Date</span><span>Mon Jul 13, 2026</span></div>
+        <div class="kv"><span>Window</span><span>11:30am – 4:15pm</span></div>
+        <div class="kv"><span>Booked under</span><span>Richa Zaveri · 4 Adults</span></div>
+        <div class="stamp">ITIN #30002M0UZ · CONF #3EW4O8</div>
+        <div class="note">Arrive 20 min early to check in. Wi-Fi is limited out there — download anything you need beforehand. This is a long day: ~3 hours each way from Talkeetna, on top of the tour itself — an early start matters.</div>
+      </div>
+
+      <div class="card rust">
+        <span class="badge booked">Booked</span>
+        <h3>Kenai Fjords Wildlife Cruise</h3>
+        <div class="loc">Resurrection Bay, Seward</div>
+        <div class="kv"><span>Date</span><span>Wed Jul 15, 2026</span></div>
+        <div class="kv"><span>Departure</span><span>10:00am</span></div>
+        <div class="kv"><span>Ticket 1</span><span>Richa Zaveri · 2 Adults</span></div>
+        <div class="kv"><span>Ticket 2</span><span>Deep Kadakia · 2 Adults</span></div>
+        <div class="stamp">#1393156961</div>
+        <div class="stamp" style="margin-left:6px;">#1393201791</div>
+      </div>
+
+    </div>
+
+    <div class="eyebrow" style="color:var(--ice); margin:36px 0 12px;">Suggested — Self-Guided, Not Booked</div>
+    <div class="grid">
+
+      <div class="card">
+        <span class="badge suggested">Suggested</span>
+        <h3>Talkeetna — Sun Jul 12, before check-in</h3>
+        <div class="loc">Downtown Talkeetna (self-guided, unbooked)</div>
+        <div class="note">The whole downtown is walkable in about 5 minutes, so it's easy to fill a couple of hours before the 3:00pm check-in:
+          <br>• Wander Main Street — historic buildings, art galleries, and shops like Nagley's Store
+          <br>• Talkeetna Historical Society Museum — local mining/railroad history, plus a scale model of Denali
+          <br>• Talkeetna Riverfront Park — views of the Susitna River, and Denali itself on a clear day
+          <br>• Denali Brewing Co.'s downtown Brewpub or the Flying Squirrel Bakery for a bite
+          <br>• If there's more time to spare, Mahay's Jet Boat tours run half-day river trips from town
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge suggested">Suggested</span>
+        <h3>Seward — Wed Jul 15 afternoon</h3>
+        <div class="loc">Seward, after the cruise (self-guided, unbooked)</div>
+        <div class="note">The cruise is a half-day tour departing 10am, so expect the afternoon and evening open:
+          <br>• Alaska SeaLife Center — Alaska's only public aquarium, right in town, good with the whole group
+          <br>• Exit Glacier — a short, mostly flat walk gets you right up to the ice, just outside Seward
+          <br>• Small Boat Harbor &amp; downtown Seward — waterfront walk, shops, and harbor views
+          <br>• Dinner around the harbor — Ray's Waterfront or Chinooks both have seafood with a view
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge suggested">Suggested</span>
+        <h3>Anchorage — Thu Jul 16 evening</h3>
+        <div class="loc">Anchorage, after Hyatt check-in (self-guided, unbooked)</div>
+        <div class="note">Arrival is ~1:30pm and check-in isn't until 3pm, so there's a full evening open too:
+          <br>• 4th Avenue downtown — historic buildings, street art, and shops, walkable from the Hyatt
+          <br>• Ship Creek — a short walk from downtown, good spot to watch salmon (and anglers) in July
+          <br>• Town Square Park — small green space downtown, live music some summer evenings
+          <br>• Dinner downtown — plenty of options right around 4th Avenue
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge suggested">Suggested</span>
+        <h3>Anchorage — Fri Jul 17, last day</h3>
+        <div class="loc">Anchorage, before the 6:15pm car return (self-guided, unbooked)</div>
+        <div class="note">This is most of a full day open, not just a morning — nothing's booked until the car return:
+          <br>• Anchorage Museum — Alaska art, history, and an Arctic Studies exhibit with the Smithsonian; plan ~1.5–2 hrs
+          <br>• Flattop Mountain — short hike in Chugach State Park with sweeping views of the city and mountains
+          <br>• Tony Knowles Coastal Trail — flat, scenic walk/bike path along Cook Inlet, good moose-spotting odds
+          <br>• Downtown shopping — 4th Avenue galleries, gift shops, and jewelers if the weather's not cooperating
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="food">
+    <div class="section-head"><span class="num">07</span><h2>Vegetarian Meal Guide</h2></div>
+    <div class="grid">
+
+      <div class="card">
+        <h3>Sun Jul 12 — Talkeetna</h3>
+        <div class="note">
+          <b>Lunch &amp; dinner:</b>
+          <br>• Payo's Thai Kitchen — homestyle Thai with a big vegetarian menu, a local favorite
+          <br>• Mountain High Pizza Pie — veg pizza, easy for the whole group
+          <br>• Denali Brewpub — salads and veg appetizers if you want something lighter
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Mon Jul 13 — Denali day</h3>
+        <div class="note">
+          <b>Lunch (near the park):</b> options thin out heading north — worth packing snacks/sandwiches from Talkeetna that morning. If timing allows a stop, Prospectors Historic Pizzeria &amp; Alehouse near the park entrance has vegan cheese for pizza.
+          <br><b>Dinner (back in Talkeetna, ~7:30pm):</b> West Rib Pub &amp; Grill (has non-meat options) or repeat Denali Brewpub/Payo's from Sunday.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tue Jul 14 — Talkeetna → Seward</h3>
+        <div class="note">
+          <b>Lunch (en route, passing through Anchorage):</b> good spot to grab Indian food — Taste of India or Bombay Deluxe are both in Anchorage, right on the drive south.
+          <br><b>Dinner (Seward):</b> Woody's Thai Kitchen — vegetarian/vegan friendly, near the harbor.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Wed Jul 15 — Seward</h3>
+        <div class="note">
+          <b>Lunch:</b> likely covered on the cruise itself — worth double-checking if a meal's included when you board.
+          <br><b>Dinner:</b> Apollo — vegetarian-friendly, easy walk from downtown. The Cookery is a solid alternative if Apollo's full.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Thu Jul 16 — Seward → Anchorage</h3>
+        <div class="note">
+          <b>Lunch (on arrival in Anchorage, ~1:30pm):</b> Taste of India or Bombay Deluxe again, or Bombay South for Indian/Nepalese.
+          <br><b>Dinner (Anchorage, evening):</b> Namaste Shangri-La, or Moose's Tooth for veg pizza if the group wants something different.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Fri Jul 17 — Anchorage, last day</h3>
+        <div class="note">
+          <b>Lunch:</b> Middle Way Cafe or Organic Oasis — both vegetarian/vegan-friendly, downtown.
+          <br><b>Dinner:</b> Likely light or skipped given the 8:04pm flight — grab something quick near the Hyatt before the car return, or eat post-security at ANC.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="shopping">
+    <div class="section-head"><span class="num">08</span><h2>Things to Buy</h2></div>
+    <div class="grid">
+      <div class="card">
+        <h3>Group essentials</h3>
+        <div class="kv"><span>Bear spray</span><span></span></div>
+        <div class="kv"><span>Chips</span><span></span></div>
+        <div class="kv"><span>Protein bars</span><span></span></div>
+      </div>
+      <div class="card amber">
+        <h3>Khushbu's list</h3>
+        <div class="kv"><span>Maggi</span><span></span></div>
+        <div class="kv"><span>MTR Upma</span><span>×2</span></div>
+        <div class="kv"><span>Sukha Nashta</span><span>×2</span></div>
+        <div class="kv"><span>Mamra</span><span></span></div>
+      </div>
+      <div class="card rust">
+        <h3>Richa's list</h3>
+        <div class="kv"><span>Khakhras</span><span></span></div>
+        <div class="kv"><span>MTR Poha</span><span>×4</span></div>
+        <div class="kv"><span>Unsweetened tea</span><span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pending">
+    <div class="section-head"><span class="num">09</span><h2>Still Pending</h2></div>
+    <div class="grid">
+      <div class="card rust">
+        <h3>Seward home — WiFi still needed</h3>
+        <div class="loc">Home in Seward, hosted by Tasha</div>
+        <div class="note">Check-in method is confirmed as a door keypad — code shows up 48 hours before check-in, so it won't be available until around Jul 12. Max 4 guests, no pets. WiFi name/password still isn't listed anywhere — worth asking Tasha for that specifically.</div>
+      </div>
+      <div class="card rust">
+        <h3>Hyatt late checkout / bag storage</h3>
+        <div class="loc">Hyatt Place Anchorage–Midtown</div>
+        <div class="note">Checkout is 12:00pm on Fri Jul 17, but the plan has the group in Anchorage until ~6:15pm for the car return and 8:04pm flight. Worth arranging late checkout or asking the front desk to hold bags for the afternoon.</div>
+      </div>
+      <div class="card rust">
+        <h3>Meals &amp; extra activities</h3>
+        <div class="loc">Talkeetna · Denali area · Seward · Anchorage</div>
+        <div class="note">No dinner reservations anywhere yet — see the self-guided cards in Activities for spots worth trying in Seward and Anchorage. Also nothing extra beyond the Denali transit and Kenai cruise (float trips, ziplining, fishing charters, jet boat tours, ATV tours, etc.) is booked — decide and book as the group firms up plans, and reserve ahead for Seward the cruise night since restaurants there fill up in July.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="attachments">
+    <div class="section-head"><span class="num">10</span><h2>A Note on Attachments</h2></div>
+    <div class="card">
+      <div class="note" style="font-size:13.5px;">This page has every date, address, confirmation number, and code pulled from the screenshots you shared — but it doesn't hold the actual files (boarding passes, PDFs, wallet passes, QR codes). For anything that needs to be scanned or shown at a counter — the airline boarding passes, the Kenai cruise barcodes, the Denali bus confirmation — everyone in the group should still keep those saved directly in their own airline app / Viator / Apple Wallet. This page is the reference copy, not the ticket itself.</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Bookmark this page — updated as bookings change. Have fun in the fjords.
+</footer>
+
+<script>
+  document.querySelectorAll('nav.route a').forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = link.getAttribute('data-target');
+      var el = document.getElementById(id);
+      if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+</script>
+</body>
+</html>
